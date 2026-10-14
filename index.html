@@ -3,23 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Trading Journal Pro</title>
+    <title>Trading Journal Pro</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="icon-192.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script async defer src="https://apis.google.com/js/api.js"></script>
+    <script async defer src="https://accounts.google.com/gsi/client"></script>
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem; }
-        .day-cell { min-height: 80px; background-color: #1e293b; border-radius: 0.5rem; padding: 0.5rem; cursor: pointer; border: 1px solid #334155; }
-        .day-cell:hover { border-color: #64748b; }
+        .day-cell { min-height: 80px; border-radius: 0.5rem; padding: 0.5rem; cursor: pointer; transition: all 0.2s; }
+        .day-cell:hover { border-color: #94a3b8 !important; }
         .positive { color: #22c55e; }
         .negative { color: #ef4444; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     <div class="max-w-5xl mx-auto space-y-6">
-        <h1 class="text-3xl font-bold text-center mb-8">Trading Journal Pro</h1>
+        
+        <!-- Header with Logo -->
+        <div class="flex items-center justify-center gap-4 mb-8">
+            <img src="logo.png" alt="Trading Journal Logo" class="w-16 h-16 rounded-2xl shadow-lg">
+            <h1 class="text-3xl md:text-4xl font-bold">Trading Journal Pro</h1>
+        </div>
         
         <!-- Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -44,14 +51,14 @@
         <!-- Monthly Summary -->
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <button id="prevMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600">&lt;</button>
-                <span id="currentMonthYear" class="mx-4 text-xl font-semibold w-40 inline-block text-center">October 2026</span>
-                <button id="nextMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600">&gt;</button>
+                <button id="prevMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 font-bold">&lt;</button>
+                <span id="currentMonthYear" class="mx-4 text-xl font-semibold w-40 inline-block text-center">...</span>
+                <button id="nextMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 font-bold">&gt;</button>
             </div>
-            <div class="flex gap-4 text-sm w-full md:w-auto justify-between">
+            <div class="flex gap-4 text-sm w-full md:w-auto justify-between text-center">
                 <div>Monthly P&L: <br><span id="monthPL" class="font-bold text-lg">₱0.00</span></div>
-                <div>Monthly Dep: <br><span id="monthDep" class="text-green-500 font-bold text-lg">₱0.00</span></div>
-                <div>Monthly With: <br><span id="monthWith" class="text-red-500 font-bold text-lg">₱0.00</span></div>
+                <div>Deposits: <br><span id="monthDep" class="text-green-500 font-bold text-lg">₱0.00</span></div>
+                <div>Withdrawals: <br><span id="monthWith" class="text-red-500 font-bold text-lg">₱0.00</span></div>
             </div>
         </div>
 
@@ -59,12 +66,54 @@
         <div class="calendar-grid text-center text-sm font-bold text-slate-400 mb-2">
             <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
         </div>
-        <div id="calendar" class="calendar-grid"></div>
+        <div id="calendar" class="calendar-grid mb-8"></div>
+
+        <!-- Data Management Section -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700">
+            <h2 class="text-xl font-bold mb-4">Data Management & Sync</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Local Storage Options -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-slate-300 border-b border-slate-700 pb-2">Local Backup</h3>
+                    <button onclick="exportJSON()" class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded font-semibold text-left flex justify-between">
+                        <span>📥 Download Backup (JSON)</span>
+                    </button>
+                    
+                    <div>
+                        <label class="block mb-1 text-sm text-slate-400">Restore Backup (JSON)</label>
+                        <input type="file" accept=".json" onchange="importJSON(event)" class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600">
+                    </div>
+
+                    <div>
+                        <label class="block mb-1 text-sm text-slate-400">Import History (CSV)</label>
+                        <input type="file" accept=".csv" onchange="importCSV(event)" class="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600">
+                        <p class="text-xs text-slate-500 mt-1">Format: Date(YYYY-MM-DD), Trades, P&L, Deposit, Withdrawal</p>
+                    </div>
+                </div>
+
+                <!-- Google Drive Sync -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-slate-300 border-b border-slate-700 pb-2 flex justify-between items-center">
+                        Google Drive Sync <span id="driveStatus" class="text-xs px-2 py-1 bg-slate-900 rounded-full text-slate-400">Disconnected</span>
+                    </h3>
+                    <p class="text-xs text-slate-400">
+                        *Requires Google Cloud Project Setup. Set CLIENT_ID and API_KEY in the code.*
+                    </p>
+                    <button id="authDriveBtn" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-semibold text-white">
+                        Connect to Google Drive
+                    </button>
+                    <button id="syncDriveBtn" class="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded font-semibold hidden">
+                        🔄 Force Manual Sync Now
+                    </button>
+                </div>
+            </div>
+        </div>
 
     </div>
 
-    <!-- Modal -->
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
+    <!-- Data Entry Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
         <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 w-full max-w-md">
             <h2 id="modalDate" class="text-xl font-bold mb-4">Date</h2>
             <div class="space-y-4">
@@ -75,39 +124,53 @@
             </div>
             <div class="mt-6 flex justify-end gap-2">
                 <button id="closeModal" class="px-4 py-2 bg-slate-700 rounded hover:bg-slate-600">Cancel</button>
-                <button id="saveData" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 text-white font-bold">Save</button>
+                <button id="saveData" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 text-white font-bold">Save Entry</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Data Structure
+        // ==========================================
+        // GOOGLE DRIVE API CONFIGURATION
+        // REPLACE THESE WITH YOUR OWN CREDENTIALS
+        // ==========================================
+        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+        const API_KEY = 'YOUR_GOOGLE_API_KEY';
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+        let isDriveConnected = false;
+        let driveFileId = null;
+
+        // --- Core Application Logic ---
         let data = JSON.parse(localStorage.getItem('tradeData')) || {};
         let initialCapital = parseFloat(localStorage.getItem('initialCapital')) || 0;
         
         document.getElementById('initialCapital').value = initialCapital || '';
         document.getElementById('initialCapital').addEventListener('change', (e) => {
             initialCapital = parseFloat(e.target.value) || 0;
-            localStorage.setItem('initialCapital', initialCapital);
+            saveLocalData();
             updateDashboard();
+            triggerAutoSync();
         });
 
-        let currentDate = new Date();
-        let selectedDateStr = null;
+        let currentViewDate = new Date();
+        const today = new Date(); // Actual current date
 
         function renderCalendar() {
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
             document.getElementById('currentMonthYear').textContent = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
             
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
             const calendar = document.getElementById('calendar');
             calendar.innerHTML = '';
             
             for (let i = 0; i < firstDay; i++) {
-                calendar.innerHTML += `<div class="day-cell opacity-20 cursor-default"></div>`;
+                calendar.innerHTML += `<div class="day-cell opacity-20 cursor-default bg-slate-800 border border-slate-700"></div>`;
             }
             
             let mPL = 0, mDep = 0, mWith = 0;
@@ -120,15 +183,21 @@
                 mDep += parseFloat(dayData.dep) || 0;
                 mWith += parseFloat(dayData.with) || 0;
 
+                // Highlight current day logic
+                const isToday = (day === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+                const cellBgBorder = isToday 
+                    ? 'bg-slate-700 border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]' 
+                    : 'bg-slate-800 border border-slate-700';
+
                 let plClass = dayData.pl > 0 ? 'positive' : (dayData.pl < 0 ? 'negative' : 'text-slate-400');
                 
                 calendar.innerHTML += `
-                    <div class="day-cell flex flex-col justify-between" onclick="openModal('${dateStr}')">
-                        <span class="text-xs font-bold text-slate-500">${day}</span>
+                    <div class="day-cell flex flex-col justify-between ${cellBgBorder}" onclick="openModal('${dateStr}')">
+                        <span class="text-xs font-bold ${isToday ? 'text-blue-400' : 'text-slate-500'}">${day}</span>
                         ${dayData.trades > 0 || dayData.pl != 0 || dayData.dep > 0 || dayData.with > 0 ? `
                         <div class="text-xs space-y-1">
                             <div class="${plClass} font-bold">₱${(dayData.pl||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-                            ${dayData.trades > 0 ? `<div class="text-slate-400">${dayData.trades} trades</div>` : ''}
+                            ${dayData.trades > 0 ? `<div class="text-slate-400">${dayData.trades} trd</div>` : ''}
                             ${dayData.dep > 0 ? `<div class="text-green-500">+₱${dayData.dep.toLocaleString()}</div>` : ''}
                             ${dayData.with > 0 ? `<div class="text-red-500">-₱${dayData.with.toLocaleString()}</div>` : ''}
                         </div>
@@ -152,7 +221,6 @@
                 tDep += parseFloat(data[key].dep) || 0;
                 tWith += parseFloat(data[key].with) || 0;
             }
-            
             const totalBalance = initialCapital + tPL + tDep - tWith;
             const netTransfers = tDep - tWith;
 
@@ -163,8 +231,14 @@
             document.getElementById('netTransfers').className = `text-2xl font-bold ${netTransfers >= 0 ? 'positive' : 'negative'}`;
         }
 
-        document.getElementById('prevMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); };
-        document.getElementById('nextMonth').onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); };
+        function saveLocalData() {
+            localStorage.setItem('tradeData', JSON.stringify(data));
+            localStorage.setItem('initialCapital', initialCapital);
+        }
+
+        let selectedDateStr = null;
+        document.getElementById('prevMonth').onclick = () => { currentViewDate.setMonth(currentViewDate.getMonth() - 1); renderCalendar(); };
+        document.getElementById('nextMonth').onclick = () => { currentViewDate.setMonth(currentViewDate.getMonth() + 1); renderCalendar(); };
 
         function openModal(dateStr) {
             selectedDateStr = dateStr;
@@ -191,21 +265,221 @@
                 data[selectedDateStr] = { trades, pl, dep, with: withAmount };
             }
             
-            localStorage.setItem('tradeData', JSON.stringify(data));
+            saveLocalData();
             document.getElementById('modal').classList.add('hidden');
             renderCalendar();
+            triggerAutoSync(); // Trigger Drive sync on change
         };
 
-        renderCalendar();
+        // --- Data Management Functions ---
 
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(r => console.log('SW registered'))
-                    .catch(e => console.log('SW fail', e));
+        function exportJSON() {
+            const exportObj = { initialCapital: initialCapital, tradeData: data, exportDate: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TradingJournalBackup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported.tradeData) {
+                        data = imported.tradeData; // Overwrite or merge logic can be added here
+                    }
+                    if (imported.initialCapital !== undefined) {
+                        initialCapital = parseFloat(imported.initialCapital);
+                        document.getElementById('initialCapital').value = initialCapital;
+                    }
+                    saveLocalData();
+                    renderCalendar();
+                    alert("Backup restored successfully!");
+                    triggerAutoSync();
+                } catch(err) { alert("Invalid JSON file. Cannot parse data."); }
+            };
+            reader.readAsText(file);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n');
+                let importCount = 0;
+                for (let i = 1; i < lines.length; i++) { // Skip header
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const dateStr = parts[0].trim();
+                        // Basic YYYY-MM-DD validation
+                        if(/\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+                            data[dateStr] = {
+                                trades: parseInt(parts[1]) || 0,
+                                pl: parseFloat(parts[2]) || 0,
+                                dep: parseFloat(parts[3]) || 0,
+                                with: parseFloat(parts[4]) || 0
+                            };
+                            importCount++;
+                        }
+                    }
+                }
+                saveLocalData();
+                renderCalendar();
+                alert(`CSV imported successfully! Parsed ${importCount} records.`);
+                triggerAutoSync();
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Google Drive API Integration ---
+        // Loaded via global gapi and google objects.
+        
+        function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+        async function initializeGapiClient() {
+            if(!CLIENT_ID || CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return; // Skip if not configured
+            try {
+                await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+                gapiInited = true;
+            } catch (e) { console.error("GAPI Init Error:", e); }
+        }
+
+        function gisLoaded() {
+            if(!CLIENT_ID || CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') return;
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // defined later
+            });
+            gisInited = true;
+        }
+
+        document.getElementById('authDriveBtn').onclick = () => {
+            if(!CLIENT_ID || CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID') {
+                alert("Google Drive sync requires configuring a CLIENT_ID and API_KEY in the source code. See the instructions in the zip file.");
+                return;
+            }
+            tokenClient.callback = async (resp) => {
+                if (resp.error) throw (resp);
+                isDriveConnected = true;
+                document.getElementById('driveStatus').textContent = "Connected";
+                document.getElementById('driveStatus').className = "text-xs px-2 py-1 bg-green-900 text-green-300 rounded-full";
+                document.getElementById('authDriveBtn').style.display = 'none';
+                document.getElementById('syncDriveBtn').style.display = 'block';
+                await downloadFromDrive(); // Pull latest on first connect
+            };
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        };
+
+        document.getElementById('syncDriveBtn').onclick = () => { triggerAutoSync(true); };
+
+        async function findDriveFile() {
+            let response = await gapi.client.drive.files.list({
+                spaces: 'appDataFolder',
+                fields: 'nextPageToken, files(id, name)',
+                pageSize: 10
+            });
+            const files = response.result.files;
+            if (files && files.length > 0) {
+                driveFileId = files[0].id;
+                return driveFileId;
+            }
+            return null;
+        }
+
+        async function uploadToDrive(forceAlert = false) {
+            if(!isDriveConnected) return;
+            document.getElementById('driveStatus').textContent = "Syncing...";
+            
+            const fileContent = JSON.stringify({ initialCapital, tradeData: data });
+            const metadata = { 'name': 'trading_journal_sync.json', 'parents': ['appDataFolder'] };
+            
+            const fileId = await findDriveFile();
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const close_delim = "\r\n--" + boundary + "--";
+
+            const multipartRequestBody =
+                delimiter + 'Content-Type: application/json\r\n\r\n' + JSON.stringify(metadata) +
+                delimiter + 'Content-Type: application/json\r\n\r\n' + fileContent + close_delim;
+
+            let request = null;
+            if(fileId) {
+                // Update existing
+                request = gapi.client.request({
+                    'path': `/upload/drive/v3/files/${fileId}`,
+                    'method': 'PATCH',
+                    'params': {'uploadType': 'multipart'},
+                    'headers': {'Content-Type': 'multipart/related; boundary="' + boundary + '"'},
+                    'body': multipartRequestBody
+                });
+            } else {
+                // Create new
+                request = gapi.client.request({
+                    'path': '/upload/drive/v3/files',
+                    'method': 'POST',
+                    'params': {'uploadType': 'multipart'},
+                    'headers': {'Content-Type': 'multipart/related; boundary="' + boundary + '"'},
+                    'body': multipartRequestBody
+                });
+            }
+
+            request.execute(function(file) {
+                document.getElementById('driveStatus').textContent = "Connected & Synced";
+                if(forceAlert) alert("Successfully synced data to Google Drive!");
             });
         }
+
+        async function downloadFromDrive() {
+            if(!isDriveConnected) return;
+            const fileId = await findDriveFile();
+            if(fileId) {
+                try {
+                    let response = await gapi.client.drive.files.get({ fileId: fileId, alt: 'media' });
+                    const remoteData = response.result;
+                    if(remoteData.tradeData) {
+                        data = remoteData.tradeData;
+                        initialCapital = parseFloat(remoteData.initialCapital) || 0;
+                        document.getElementById('initialCapital').value = initialCapital;
+                        saveLocalData();
+                        renderCalendar();
+                        console.log("Data pulled from Drive successfully.");
+                    }
+                } catch(e) { console.error("Error downloading from Drive:", e); }
+            }
+        }
+
+        function triggerAutoSync(forceAlert = false) {
+            if(isDriveConnected) uploadToDrive(forceAlert);
+        }
+
+        // --- Initialization ---
+        renderCalendar();
+
+        // PWA SW
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(e => console.log('SW fail', e));
+            });
+        }
+        
+        // Setup Google Callbacks implicitly attached to window for script loading
+        window.onload = function() {
+            if(typeof gapi !== 'undefined') gapiLoaded();
+            if(typeof google !== 'undefined') gisLoaded();
+        };
+
     </script>
 </body>
 </html>
