@@ -36,15 +36,15 @@
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                 <p class="text-slate-400 text-sm">Total Current Balance</p>
-                <p id="totalBalance" class="text-2xl font-bold">₱0.00</p>
+                <p id="totalBalance" class="text-2xl font-bold">$0.00</p>
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                 <p class="text-slate-400 text-sm">All-Time Net Profit</p>
-                <p id="allTimeProfit" class="text-2xl font-bold">₱0.00</p>
+                <p id="allTimeProfit" class="text-2xl font-bold">$0.00</p>
             </div>
             <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
                 <p class="text-slate-400 text-sm">Net Deposits/Withdrawals</p>
-                <p id="netTransfers" class="text-2xl font-bold">₱0.00</p>
+                <p id="netTransfers" class="text-2xl font-bold">$0.00</p>
             </div>
         </div>
 
@@ -56,9 +56,9 @@
                 <button id="nextMonth" class="px-3 py-1 bg-slate-700 rounded hover:bg-slate-600 font-bold">&gt;</button>
             </div>
             <div class="flex gap-4 text-sm w-full md:w-auto justify-between text-center">
-                <div>Monthly P&L: <br><span id="monthPL" class="font-bold text-lg">₱0.00</span></div>
-                <div>Deposits: <br><span id="monthDep" class="text-green-500 font-bold text-lg">₱0.00</span></div>
-                <div>Withdrawals: <br><span id="monthWith" class="text-red-500 font-bold text-lg">₱0.00</span></div>
+                <div>Monthly P&L: <br><span id="monthPL" class="font-bold text-lg">$0.00</span></div>
+                <div>Deposits: <br><span id="monthDep" class="text-green-500 font-bold text-lg">$0.00</span></div>
+                <div>Withdrawals: <br><span id="monthWith" class="text-red-500 font-bold text-lg">$0.00</span></div>
             </div>
         </div>
 
@@ -118,9 +118,9 @@
             <h2 id="modalDate" class="text-xl font-bold mb-4">Date</h2>
             <div class="space-y-4">
                 <div><label class="block text-sm text-slate-400">Number of Trades</label><input type="number" id="tradesInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
-                <div><label class="block text-sm text-slate-400">Daily P&L (₱)</label><input type="number" id="plInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
-                <div><label class="block text-sm text-slate-400 text-green-500">Deposit (₱)</label><input type="number" id="depInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
-                <div><label class="block text-sm text-slate-400 text-red-500">Withdrawal (₱)</label><input type="number" id="withInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
+                <div><label class="block text-sm text-slate-400">Daily P&L ($)</label><input type="number" id="plInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
+                <div><label class="block text-sm text-slate-400 text-green-500">Deposit ($)</label><input type="number" id="depInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
+                <div><label class="block text-sm text-slate-400 text-red-500">Withdrawal ($)</label><input type="number" id="withInput" class="w-full bg-slate-900 border border-slate-600 rounded p-2 mt-1"></div>
             </div>
             <div class="mt-6 flex justify-end gap-2">
                 <button id="closeModal" class="px-4 py-2 bg-slate-700 rounded hover:bg-slate-600">Cancel</button>
@@ -134,8 +134,8 @@
         // GOOGLE DRIVE API CONFIGURATION
         // REPLACE THESE WITH YOUR OWN CREDENTIALS
         // ==========================================
-        const CLIENT_ID = '885056102422-rfte5ru7b1vkchigrk587e4s7qioo0nh.apps.googleusercontent.com';
-        const API_KEY = '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';
+        const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+        const API_KEY = 'YOUR_GOOGLE_API_KEY';
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
         let tokenClient;
@@ -196,20 +196,20 @@
                         <span class="text-xs font-bold ${isToday ? 'text-blue-400' : 'text-slate-500'}">${day}</span>
                         ${dayData.trades > 0 || dayData.pl != 0 || dayData.dep > 0 || dayData.with > 0 ? `
                         <div class="text-xs space-y-1">
-                            <div class="${plClass} font-bold">₱${(dayData.pl||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+                            <div class="${plClass} font-bold">$${(dayData.pl||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                             ${dayData.trades > 0 ? `<div class="text-slate-400">${dayData.trades} trd</div>` : ''}
-                            ${dayData.dep > 0 ? `<div class="text-green-500">+₱${dayData.dep.toLocaleString()}</div>` : ''}
-                            ${dayData.with > 0 ? `<div class="text-red-500">-₱${dayData.with.toLocaleString()}</div>` : ''}
+                            ${dayData.dep > 0 ? `<div class="text-green-500">+$${dayData.dep.toLocaleString()}</div>` : ''}
+                            ${dayData.with > 0 ? `<div class="text-red-500">-$${dayData.with.toLocaleString()}</div>` : ''}
                         </div>
                         ` : ''}
                     </div>
                 `;
             }
             
-            document.getElementById('monthPL').textContent = `₱${mPL.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('monthPL').textContent = `$${mPL.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             document.getElementById('monthPL').className = `font-bold text-lg ${mPL >= 0 ? 'positive' : 'negative'}`;
-            document.getElementById('monthDep').textContent = `₱${mDep.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-            document.getElementById('monthWith').textContent = `₱${mWith.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('monthDep').textContent = `$${mDep.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('monthWith').textContent = `$${mWith.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             
             updateDashboard();
         }
@@ -224,10 +224,10 @@
             const totalBalance = initialCapital + tPL + tDep - tWith;
             const netTransfers = tDep - tWith;
 
-            document.getElementById('totalBalance').textContent = `₱${totalBalance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
-            document.getElementById('allTimeProfit').textContent = `₱${tPL.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('totalBalance').textContent = `$${totalBalance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('allTimeProfit').textContent = `$${tPL.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             document.getElementById('allTimeProfit').className = `text-2xl font-bold ${tPL >= 0 ? 'positive' : 'negative'}`;
-            document.getElementById('netTransfers').textContent = `₱${netTransfers.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+            document.getElementById('netTransfers').textContent = `$${netTransfers.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
             document.getElementById('netTransfers').className = `text-2xl font-bold ${netTransfers >= 0 ? 'positive' : 'negative'}`;
         }
 
